@@ -70,6 +70,36 @@ def recolor(im: Image.Image):
 def resize(im: Image.Image, width: int, height: int, filter_: int):
     return im.resize((width, height), resample=filter_)
 
+def auto_brightness(im: Image.Image):
+    hist, bins = np.histogram(im, 255)
+    threshold = im.size / 5000
+    num_pix = 0
+    min_im = 0
+    max_im = im.max()
+
+    for i in range(255):
+        num_pix += hist[i]
+        if num_pix > threshold:
+            min_im = bins[i]
+            break
+
+    num_pix = 0
+    for j in range(1, 255):
+        num_pix += hist[-j]
+        if num_pix > threshold:
+            max_im = bins[-j]
+            break
+    
+    fp = np.zeros(bins.shape)
+    fp[:i] = 1
+    fp[-j:] = 255
+    for index in range(i, 256 - j):
+        range_ = 256 - j - i
+        step = 254 / range_
+        fp[index] = (index - i) * step + 1
+
+    im2 = np.interp(im.flatten(), bins, fp).reshape(im.shape).astype(np.uint8)
+    return im2
 
 def process():
     try:
