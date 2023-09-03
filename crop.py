@@ -1,5 +1,7 @@
 import numpy as np
 import os
+import logging
+import logging.config
 # import matplotlib.pyplot as plt
 import tkinter as tk
 from PIL import Image
@@ -7,6 +9,10 @@ from mod_tk import ListFrame
 from tkinter import ttk, messagebox
 from tkinter.filedialog import askdirectory
 from tkinter.colorchooser import askcolor
+
+logging.config.fileConfig('config.ini')
+
+logger = logging.getLogger()
 
 
 def set_save_path():
@@ -71,11 +77,12 @@ def resize(im: Image.Image, width: int, height: int, filter_: int):
     return im.resize((width, height), resample=filter_)
 
 def auto_brightness(im: Image.Image):
+    im = np.asarray(im)
     hist, bins = np.histogram(im, 255)
     threshold = im.size / 5000
     num_pix = 0
     min_im = 0
-    max_im = im.max()
+    max_im = np.max(im)
 
     for i in range(255):
         num_pix += hist[i]
@@ -99,7 +106,7 @@ def auto_brightness(im: Image.Image):
         fp[index] = (index - i) * step + 1
 
     im2 = np.interp(im.flatten(), bins, fp).reshape(im.shape).astype(np.uint8)
-    return im2
+    return Image.fromarray(im2)
 
 def process():
     try:
@@ -137,6 +144,8 @@ def process():
             print(width, height)
             filter_ = filters.index(filter_tk.get())
             im = resize(im, int(width), int(height), filter_)
+        if is_brightness.get():
+            im = auto_brightness(im)
         path = ''.join((dir_, '/', os.path.basename(i), suffix, ext))
         im.save(path, dpi=(dpi, dpi))
     messagebox.showinfo(title='Done.', message='Done!')
@@ -177,6 +186,8 @@ is_gray = tk.IntVar()
 is_gray.set(0)
 is_recolor = tk.IntVar()
 is_recolor.set(0)
+is_brightness = tk.IntVar()
+is_brightness.set(0)
 is_size = tk.IntVar()
 is_size.set(1)
 size_tk = tk.StringVar()
@@ -223,6 +234,7 @@ f_process.pack(side=tk.TOP, fill=tk.X, expand=0, ipady=5)
 ttk.Checkbutton(master=f_process, text='crop image', variable=is_crop).pack(side=tk.TOP, fill=tk.X)
 ttk.Checkbutton(master=f_process, text='gray image', variable=is_gray).pack(side=tk.TOP, fill=tk.X)
 ttk.Checkbutton(master=f_process, text='recolor image', variable=is_recolor, command=choose_color).pack(side=tk.TOP, fill=tk.X)
+ttk.Checkbutton(master=f_process, text='Auto brightness', variable=is_brightness).pack(side=tk.TOP, fill=tk.X)
 
 
 f_size = ttk.LabelFrame(master=frame_right, text='size')
