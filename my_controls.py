@@ -1,6 +1,25 @@
 import flet as ft
 import os
 
+
+# class FileItem(ft.UserControl):
+#     def __init__(self, children, data, callback):
+#         self.children = children
+#         self.data = data
+#         self.callback = callback
+
+#     def build(self):
+#         return ft.ListTile(
+#                     title=ft.Text(file.name),
+#                     subtitle=ft.Row(controls=[
+#                         ft.Text(file.path),
+#                         ft.Text(f'{round(file.size/1000, 2)} Kb')
+#                     ]),
+#                     data=file.path,
+#                     trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=remove),
+#                     on_click= lambda e: print(e.control.data)
+#                 )
+
 class FileList(ft.UserControl):
     def __init__(self):
         super().__init__()
@@ -8,8 +27,7 @@ class FileList(ft.UserControl):
     
     def _add(self, _):
         def remove(event):
-            # self.lv.controls.remove(dir(event.control))
-            print(dir(event.control))
+            self.lv.controls.remove(event.control)
             self.update()
 
         def add_files(event):
@@ -19,11 +37,12 @@ class FileList(ft.UserControl):
                     title=ft.Text(file.name),
                     subtitle=ft.Row(controls=[
                         ft.Text(file.path),
-                        ft.Text(f'{round(file.size/1000, 2)}kb')
+                        ft.Text(f'{round(file.size/1000, 2)} Kb')
                     ]),
                     data=file.path,
-                    trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=remove),
-                    on_click= lambda e: print(e.control.data)
+                    # trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=remove),
+                    on_click= lambda e: print(e.control.data),
+                    on_long_press= remove
                 ))
             self.update()
 
