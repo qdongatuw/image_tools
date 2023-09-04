@@ -1,48 +1,38 @@
 import flet as ft
-import os
+from datetime import datetime
 
+class FileItem(ft.ListTile):
+    def __init__(self, remove_item, *args, **kwargs):
+        super().__init__( *args, **kwargs)
+        self.trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=self.delete)
+        self.remove_item = remove_item
 
-# class FileItem(ft.UserControl):
-#     def __init__(self, children, data, callback):
-#         self.children = children
-#         self.data = data
-#         self.callback = callback
-
-#     def build(self):
-#         return ft.ListTile(
-#                     title=ft.Text(file.name),
-#                     subtitle=ft.Row(controls=[
-#                         ft.Text(file.path),
-#                         ft.Text(f'{round(file.size/1000, 2)} Kb')
-#                     ]),
-#                     data=file.path,
-#                     trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=remove),
-#                     on_click= lambda e: print(e.control.data)
-#                 )
+    def delete(self, e):
+        self.remove_item(self)
 
 class FileList(ft.UserControl):
-    def __init__(self):
+    def __init__(self, height, click_item):
         super().__init__()
-        self.lv = ft.ListView(height=600)
+        self.height = height
+        self.lv = ft.ListView(expand=True)
+        self.click_item = click_item
     
     def _add(self, _):
-        def remove(event):
-            self.lv.controls.remove(event.control)
+        def remove(item):
+            self.lv.controls.remove(item)
             self.update()
 
         def add_files(event):
             for file in event.files:
-                # print(file.name)
-                self.lv.controls.append(ft.ListTile(
-                    title=ft.Text(file.name),
+                self.lv.controls.append(FileItem(
+                    title=ft.Text(file.name, size=16),
                     subtitle=ft.Row(controls=[
-                        ft.Text(file.path),
-                        ft.Text(f'{round(file.size/1000, 2)} Kb')
+                        # ft.Text(file.path),
+                        ft.Text(f'{round(file.size/1000, 2)} Kb', size=12)
                     ]),
                     data=file.path,
-                    # trailing=ft.IconButton(icon=ft.icons.REMOVE, on_click=remove),
-                    on_click= lambda e: print(e.control.data),
-                    on_long_press= remove
+                    on_click=self.click_item,
+                    remove_item=remove
                 ))
             self.update()
 
@@ -58,23 +48,23 @@ class FileList(ft.UserControl):
 
     def build(self):
         return ft.Container(
-            content=ft.Column(
+            height=self.height,
+            content=ft.Row(
                 controls=[
-                    self.lv,
-                    ft.Row(
+                    ft.Column(
                         controls=[
                             ft.IconButton(icon=ft.icons.ADD, on_click=self._add),
                             ft.IconButton(icon=ft.icons.CLEAR_ALL, on_click=self._clear),
                         ],
                     ),
-                    
+                    self.lv,
                 ]
 
         ))
     
 
 def main(page: ft.Page):
-    page.add(FileList())
+    page.add(FileList(height=800))
     
 
 if __name__ == '__main__':
