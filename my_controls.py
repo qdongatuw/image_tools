@@ -11,9 +11,10 @@ class FileItem(ft.ListTile):
         self.remove_item(self)
 
 class FileList(ft.UserControl):
-    def __init__(self, height, click_item):
+    def __init__(self, height, width, click_item):
         super().__init__()
         self.height = height
+        self.width = width
         self.lv = ft.ListView(expand=True)
         self.click_item = click_item
     
@@ -49,6 +50,7 @@ class FileList(ft.UserControl):
     def build(self):
         return ft.Container(
             height=self.height,
+            width=self.width,
             content=ft.Row(
                 controls=[
                     ft.Column(
@@ -64,7 +66,7 @@ class FileList(ft.UserControl):
     
 
 def main(page: ft.Page):
-    page.add(FileList(height=800))
+    page.add(FileList(height=800, width=300, click_item= lambda e : print(e.control.data)))
     
 
 if __name__ == '__main__':
